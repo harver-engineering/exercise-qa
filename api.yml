@@ -1,0 +1,217 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Harver Candidate API (QA Exercise)
+  description: This API provides basic CRUD operations for a Candidate resource. Users must be authorized
+               with basic authentication for all non-read operations.
+paths:
+  /candidates:
+    get:
+      description:
+        Lists all candidates in the system. Anonymous users may view this path.
+      operationId: getCandidates
+      responses:
+        '200':
+          description: Successful response, a list of candidates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Candidate'
+    post:
+      description: Creates a new candidate. You must be authorized to use this path.
+      operationId: createCandidate
+      security:
+        - basicAuth: []
+      requestBody:
+        description: New candidate data; first name, last name, matching score and vacancy applied for.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostCandidate'
+            example: { "firstName": "Donald", "lastName": "Trump", "matchingScore": 3, "vacancyTitle": 'President'  }
+      responses:
+        '201':
+          description: Provides the newly created candidate resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Candidate'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /candidates/{id}:
+    get:
+      description: Find a candidate by their ID. Anonymous users may use this path.
+      operationId: getCandidateForId
+      parameters:
+        - name: id
+          in: path
+          description: ID of the candidate to get
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Provides the candidate resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Candidate'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      description: Update a candidate's data, this request may not include an ID. You must be authorized to use this path.
+      operationId: updateCandidate
+      security:
+        - basicAuth: []
+      requestBody:
+        description: New candidate data
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutCandidate'
+            example: { "firstName": "Boris", "lastName": "Johnson", "matchingScore": 2, "vacancyTitle": 'Prime Minister' }
+      responses:
+        '200':
+          description: Provides the updated candidate resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Candidate'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    patch:
+      description: Apply changes to a candidate's data, this request may not include an ID. You must be authorized to use this path.
+      security:
+        - basicAuth: []
+      operationId: patchCandidate
+      requestBody:
+        description: Candidate updates to patch
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchCandidate'
+            example: { "vacancyTitle": 'Charlatan' }
+      responses:
+        '200':
+          description: Provides the updated candidate resource.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Candidate'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      description: Deletes a single candidate based on the given ID. You must be authorized to use this path.
+      security:
+        - basicAuth: []
+      operationId: deleteCandidate
+      parameters:
+        - name: id
+          in: path
+          description: ID of candidate to delete
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Candidate deleted
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    Candidate:
+      type: object
+      properties:
+        id:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        matchingScore:
+          type: integer
+          format: int32
+        vacancyTitle:
+          type: string
+
+    CandidateBody:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        matchingScore:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 100
+        vacancyTitle:
+          type: string
+      additionalProperties: false
+
+    PostCandidate:
+      $ref: '#/components/schemas/CandidateBody'
+      required:
+        - firstName
+        - lastName
+        - matchingScore
+        - vacancyTitle
+
+    PutCandidate:
+      $ref: '#/components/schemas/CandidateBody'
+      required:
+        - firstName
+        - lastName
+        - matchingScore
+        - vacancyTitle
+
+    PatchCandidate:
+      $ref: '#/components/schemas/CandidateBody'
+
+    Error:
+      required:
+        - status
+        - message
+      properties:
+        status:
+          type: integer
+          format: int32
+        message:
+          type: string
+
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
