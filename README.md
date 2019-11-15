@@ -25,7 +25,7 @@ To start the server:
 You can now access the API at: [http://localhost:3000](http://localhost:3000)
 
 The API specification (how it should work) is detailed in `api.yml`. You can also view the auto-generated documentation
-at [docs/api.html](file:docs/api.html).
+at `[docs/api.html](file:docs/api.html)`.
 
 ## Tasks
 
